@@ -6,8 +6,8 @@ import re
 
 app = Flask(__name__)
 
-openai.api_key = "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"
-NEWSAPI_KEY = "76a4c8fd5723459fae6686716d8b270c"
+openai.api_key = "check text file"
+NEWSAPI_KEY = "newskey"
 
 
 def fetch_news(keywords, language="en", page_size=3):
