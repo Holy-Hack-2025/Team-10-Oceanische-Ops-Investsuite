@@ -14,10 +14,21 @@ NEWSAPI_KEY = "63a1e94e1fed45f3b24062495b1bd58c"
 
 
 def fetch_news(keywords, language="en", page_size=3):
+    """
+    Haalt nieuwsartikelen op van NewsAPI voor de opgegeven zoekwoorden.
+
+    Parameters:
+        keywords (list): Een lijst van zoekwoorden (bedrijfsnamen, sectoren, etc.) waarvoor nieuws wordt opgehaald.
+        language (str): De taal van de nieuwsartikelen die opgehaald moeten worden (standaard "en").
+        page_size (int): Het aantal artikelen per zoekwoord dat opgehaald wordt (standaard 3).
+
+    Returns:
+        list: Een lijst van dictionaries met artikelgegevens (titel, url, beschrijving).
+    """
     all_articles = []
 
     for keyword in keywords:
-        query = keyword  # Gebruik elk keyword afzonderlijk
+        query = keyword
         url = f"https://newsapi.org/v2/everything?q={query}&language={language}&pageSize={page_size}&apiKey={NEWSAPI_KEY}"
 
         response = requests.get(url)
@@ -32,7 +43,7 @@ def fetch_news(keywords, language="en", page_size=3):
                 }
                 for article in data["articles"]
             ]
-            all_articles.extend(articles)  # Voeg de opgehaalde artikelen toe aan de lijst
+            all_articles.extend(articles)
             print(f"Opgehaalde artikelen voor '{keyword}': {articles}")
         else:
             print(f"Geen artikelen gevonden voor '{keyword}' of er is een fout bij het ophalen.")
@@ -41,12 +52,20 @@ def fetch_news(keywords, language="en", page_size=3):
 
 
 def getCompanies(message):
+    """
+    Verstuurt een prompt naar GPT-4 om een lijst van bedrijven of sectoren te verkrijgen op basis van de input.
+
+    Parameters:
+        message (str): De input die bedrijven of sectoren beschrijft.
+
+    Returns:
+        str: Een string met de relevante bedrijven of sectoren zoals afgeleid door GPT-4.
+    """
     prompt = ("Hey gpt, als input krijg je een aantal bedrijven of een bepaalde sector. Indien je enkel"
               "bedrijven krijgt moet je zelf afleiden over welke sector het gaat en geef je de belangrijkste"
               "bedrijven terug in deze sector waarin geïnvesteerd kan worden. Hier is de input: ")
     prompt += message
 
-    # Verstuur de prompt naar GPT
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
@@ -54,20 +73,26 @@ def getCompanies(message):
         temperature=0.5,
     )
 
-    # Ontvang en verwerk het antwoord
     reply = response['choices'][0]['message']['content'].strip()
-
     return reply
 
 
 def makeListOfCompanies(message):
+    """
+    Verstuurt een prompt naar GPT-4 om een lijst van bedrijven te verkrijgen uit de gegeven inputstring.
+
+    Parameters:
+        message (str): De inputstring die bedrijven of sectoren bevat.
+
+    Returns:
+        list: Een lijst van bedrijven zoals afgeleid door GPT-4.
+    """
     prompt = ("Hey gpt, als input krijg je een bericht waarin allemaal bedrijven gaan staan. Ik wil dat"
               "je ENKEL een lijst teruggeeft met deze bedrijven in en misschien ook de sector indien relevant"
               "Dit mag enkel een lijst zijn omdat ik deze respons ga gebruiken in een andere functie waar"
               "ze een lijst verwachten. Hier is de input:")
     prompt += message
 
-    # Verstuur de prompt naar GPT
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
@@ -75,27 +100,30 @@ def makeListOfCompanies(message):
         temperature=0.5,
     )
 
-    # Ontvang en verwerk het antwoord
     reply = response['choices'][0]['message']['content'].strip().split("\n")
-
     return reply
 
 
 def newsArticlesToScore(newsMessages):
-    # Haal de relevante informatie uit de nieuwsartikelen (bijvoorbeeld de titel en beschrijving)
+    """
+    Verstuurt een verzameling van nieuwsartikelen naar GPT-4 om een score te genereren voor elk bedrijf op basis van de artikelen.
+
+    Parameters:
+        newsMessages (list): Een lijst van nieuwsartikelen (elk artikel bevat een titel en een beschrijving).
+
+    Returns:
+        str: Een string waarin bedrijven worden beoordeeld met een score tussen 0 en 100.
+    """
     news_strings = [
         f"Title: {article['title']}\nDescription: {article['description']}" for article in newsMessages
     ]
 
-    # Combineer deze string-lijst in één string, gescheiden door een nieuwe regel
-    news_string = "\n\n".join(news_strings)  # Voeg ze samen met extra spaties tussen de artikelen
+    news_string = "\n\n".join(news_strings)
 
-    # Verstuur de string naar GPT voor verdere verwerking
     prompt = f"Hey GPT, hier is een verzameling nieuwsartikelen:\n{news_string}\n\n" \
              "Beoordeel elk bedrijf op basis van deze artikelen. Geef een score tussen 0 en 100 voor elk bedrijf" \
              " en geef de naam van het bedrijf gevolgd door de score als volgt: 'Tesla Inc.': 75."
 
-    # Verstuur de prompt naar GPT
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
@@ -105,14 +133,22 @@ def newsArticlesToScore(newsMessages):
         temperature=0.5,
     )
 
-    # Ontvang en verwerk het antwoord
     reply = response.choices[0].message.content.strip()
-
     return reply
 
 
 def parse_scores_to_tuples(scores_string, companies, news_articles):
-    # Verstuur de string naar GPT voor verdere verwerking
+    """
+    Verwerkt de scores en zet deze om in een lijst van tuples met de bedrijfsnaam, artikel-URL en de score.
+
+    Parameters:
+        scores_string (str): Een string met de scores van bedrijven.
+        companies (list): Een lijst van bedrijven die in de beoordeling zijn meegenomen.
+        news_articles (list): Een lijst van nieuwsartikelen die bij de beoordeling gebruikt zijn.
+
+    Returns:
+        str: Een string met een lijst van tuples (bedrijf, artikel-URL, score).
+    """
     prompt = (f"Hey GPT, hier is een verzameling scores van bedrijven:\n{scores_string}\n\n"
               "Ik wil exact een lijst terugkrijgen van tuples van lengte 3, in deze tuple moet op"
               "de eerste positie de naam van het bedrijf komen, daarna de link naar het artikel"
@@ -123,35 +159,37 @@ def parse_scores_to_tuples(scores_string, companies, news_articles):
               f"{news_articles}\n\n"
               f"Bedrijven die betrokken zijn:\n{companies}")
 
-    # Verstuur de prompt naar GPT
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         n=1,
         stop=None,
-        max_tokens=500,  # Aangepast om meer tekst te kunnen verwerken
+        max_tokens=500,
         temperature=0.5,
     )
 
-    # Ontvang en verwerk het antwoord
     reply = response.choices[0].message.content.strip()
-
     return reply
 
 
 def extract_list_from_string(input_string):
-    # Zoek de lijst van tuples in de string met behulp van reguliere expressies
-    # Hier nemen we aan dat de lijst zich altijd na "Hier is de lijst van tuples" bevindt
+    """
+    Zoekt naar een lijst van tuples in een string en converteert deze naar een echte Python-lijst.
+
+    Parameters:
+        input_string (str): De string die de lijst van tuples bevat.
+
+    Returns:
+        list: Een lijst van tuples (bedrijf, artikel-URL, score).
+    """
     start_index = input_string.find("[")
     end_index = input_string.find("]") + 1
 
     if start_index != -1 and end_index != -1:
-        # Haal de substring die de lijst bevat
         list_string = input_string[start_index:end_index]
 
         try:
-            # Zet de lijst van strings om naar een echte Python lijst
-            extracted_list = ast.literal_eval(list_string)  # Veilige manier om de lijst van tuples te evalueren
+            extracted_list = ast.literal_eval(list_string)
             return extracted_list
         except Exception as e:
             print(f"Er is een fout opgetreden bij het verwerken van de lijst: {e}")
@@ -161,40 +199,38 @@ def extract_list_from_string(input_string):
         return []
 
 
-
 def main(input):
-    # Verkrijg de lijst van bedrijven van GPT
-    companiesString = getCompanies(input)
+    """
+    De hoofdcode die verschillende functies aanroept om bedrijven op te halen, nieuwsartikelen te vinden,
+    bedrijven te beoordelen en de resultaten te retourneren.
 
-    # Maak een lijst van bedrijven uit de string die we terugkrijgen
+    Parameters:
+        input (str): Een lijst van bedrijfsnamen (of sectoren) als invoer voor de analyse.
+
+    Returns:
+        list: Een lijst van tuples (bedrijf, artikel-URL, score).
+    """
+    companiesString = getCompanies(input)
     companiesList = makeListOfCompanies(companiesString)
 
-    # Hier nemen we de eerste waarde uit de lijst (aangezien makeListOfCompanies een lijst van strings retourneert)
-    companies_str = companiesList[0].strip()  # Verwijder eventuele extra spaties
+    companies_str = companiesList[0].strip()
 
     print(companies_str)
 
     try:
-        # Converteer de string naar een echte lijst van bedrijven
         companies = json.loads(companies_str)
     except json.JSONDecodeError:
         print("Er is een fout opgetreden bij het omzetten van de bedrijvenlijst naar een lijst.")
         return []
 
-    # Haal de nieuwsartikelen op voor de bedrijven
     newsArticles = fetch_news(companies)
 
-
-    # Als er geen nieuwsartikelen zijn, retourneer een lege lijst of een passende foutmelding
     if not newsArticles:
         print("Geen nieuwsartikelen gevonden.")
         return []
 
-    # Genereer de scores gebaseerd op de nieuwsartikelen
     ScoresString = newsArticlesToScore(newsArticles)
 
-
-    # Zet de scores om in een lijst van tuples (bedrijf, url, score)
     almost = parse_scores_to_tuples(ScoresString, companies, newsArticles)
 
     result = extract_list_from_string(almost)
