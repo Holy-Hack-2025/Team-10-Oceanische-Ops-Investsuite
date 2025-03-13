@@ -182,6 +182,7 @@ def extract_list_from_string(input_string):
     Returns:
         list: Een lijst van tuples (bedrijf, artikel-URL, score).
     """
+    print(input_string)
     start_index = input_string.find("[")
     end_index = input_string.find("]") + 1
 
@@ -238,4 +239,4 @@ def main(input):
     return result
 
 
-print(main('tesla, volvo, opel'))
+print(main('Volkswagen, Pirelli, Mercedes'))
