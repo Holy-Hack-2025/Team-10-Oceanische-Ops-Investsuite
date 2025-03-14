@@ -8,9 +8,9 @@ import ast
 app = Flask(__name__)
 
 openai.api_key = ("sk-proj--jkPAXjUhF4XzDF-bq8rm5FnWraBVq6DFuB53FJLNMYCx_MF4VGO1f_KLu0splZrC2muFEWakFT3"
-                  "BlbkFJntA8k8TR_3AleSc-V2qaJ-5zrvQ3xSxoDyr3ixRakueaO_I_9Ob109m-xH4rb4Y62AsdDpCD8A")
+                      "BlbkFJntA8k8TR_3AleSc-V2qaJ-5zrvQ3xSxoDyr3ixRakueaO_I_9Ob109m-xH4rb4Y62AsdDpCD8A")
 
-NEWSAPI_KEY = "63a1e94e1fed45f3b24062495b1bd58c"
+NEWSAPI_KEY = "7c9fd40d035b41b2a4b430c759713630"
 
 
 def fetch_news(keywords, language="en", page_size=3):
@@ -199,8 +199,38 @@ def extract_list_from_string(input_string):
         print("Er werd geen lijst gevonden in de string.")
         return []
 
+import random
+import math
 
-def main(input):
+def generate_spread_points(width=2000, height=2000, num_points=100, min_distance=100):
+    """
+    Genereert een lijst van punten op een 2000x2000 scherm waarbij:
+    - Punten willekeurig geplaatst worden.
+    - Geen twee punten dichter bij elkaar staan dan min_distance.
+
+    Parameters:
+        width (int): Breedte van het canvas.
+        height (int): Hoogte van het canvas.
+        num_points (int): Aantal punten dat gegenereerd moet worden.
+        min_distance (int): Minimale afstand tussen punten.
+
+    Returns:
+        list: Lijst met tuples van coördinaten (x, y).
+    """
+    points = []
+
+    while len(points) < num_points:
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+
+        # Check of het nieuwe punt ver genoeg is van bestaande punten
+        if all(math.dist((x, y), (px, py)) >= min_distance for px, py in points):
+            points.append((x, y))
+
+    return points
+
+
+def getDataHeatmap(input):
     """
     De hoofdcode die verschillende functies aanroept om bedrijven op te halen, nieuwsartikelen te vinden,
     bedrijven te beoordelen en de resultaten te retourneren.
@@ -236,7 +266,16 @@ def main(input):
 
     result = extract_list_from_string(almost)
 
-    return result
+    length_result = len(result)
+    points = generate_spread_points(num_points=length_result)
+
+    # Maak de lijst van dicts met "x", "y", "value", "name" en "url"
+    data = [
+        {"x": x, "y": y, "value": int(value), "name": name, "url": url}
+        for (name, url, value), (x, y) in zip(result, points)
+    ]
+
+    return data
 
 
-print(main('Volkswagen, Pirelli, Mercedes'))
+print(getDataHeatmap('Volkswagen, Pirelli, Mercedes'))

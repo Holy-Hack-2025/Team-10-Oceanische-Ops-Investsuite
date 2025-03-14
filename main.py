@@ -1,10 +1,14 @@
-from flask import Flask, jsonify, send_from_directory
+import os
+from flask import Flask, jsonify, send_from_directory, request
+import sys
+
+from app import *
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
 @app.route("/")
 def index():
-    return send_from_directory(".", "index.html")
+    return send_from_directory("frontend", "index.html")
 
 @app.route("/get_heatmap_data")
 def get_heatmap_data():
@@ -32,6 +36,10 @@ def get_heatmap_data():
     {"x": 999, "y": 480, "value": 9, "name": "Hyundai"},
     {"x": 1750, "y": 391, "value": 9, "name": "Lamborghini"}
 ]    }
+
+    data = getDataHeatmap('Volkswagen, Pirelli, Mercedes')
+    print(data)
+
     return jsonify(heatmap_data)
 
 if __name__ == "__main__":
