@@ -1,38 +1,7 @@
-# Holy Hack - repo team Oceanische Ops 
+# StockScope - Project Team Oceanische Ops :computer: :money_with_wings:
+Nowadays even the common man should know a thing or two about investing, however, staring blankly at boring candlestick charts or unintuitive financial reports for hours on end isn't gonna make anyone any wiser about which stocks to buy and which to sell. Besides, you can't reliably predict the course of a given stock. This is why shareholders need the quickest news about the companies they're invested in. Our AI-driven program scrapes the internet for the latest information from credible news sources and neatly presents its projections based on this information in a website-based heatmap in real time, showing users which stocks are hot and which are not, removing the need to analyse anything yourself.
 
-Welcome to your personal Holy Hack GitHub repository! This serves as a central hub for submitting your code to be reviewed during the judging sessions. You should modify this README file to better explain your project to the judges, making it easier for them to understand your work.
+The data is then synced with actuals from stock markets so the most recent updates are also visible. This is done so a full timeline of a given sector can be displayed in the heat map, to visualise shifts and trends in market appeal.
 
-## 🚀 Getting Started
-
-Each team will be given its own repository within the **Holy Hack** GitHub organization, this is your personal repo. Follow these steps to participate:
-
-1. **Clone this repository to your local machine using**:
-   ```sh
-   git clone https://github.com/HOLY-HACK-ORGANIZATION/YOUR-TEAM-REPO.git
-   ```
-2. **Add your project files to the appropriate directory in your team's repository**.
-3. **Commit and push your changes**:
-   ```sh
-   git add .
-   git commit -m "added my feature"
-   git push origin my-feature
-   ```
-4. **Submit a pull request (PR)** to your team's repository for code review and merge.
-
-## Repository Structure (Per Team)
-
-```
-YOUR-TEAM-REPO/
-│-- README.md # Documentation for your team's project
-│-- src/ # source directory
-│-- docs/ # Additional documentation or assets
-```
-
-## Contribution Guidelines
-
-- Make sure your code is clean and well documented.
-- Follow coding standards and best practices.
-- Submit your projects before the 16:00 deadline.
-
-## ❓ Need help?
-If you have any questions, you can contact the github guru's.
+*How it works*:
+Based on certain keywords, an AI in searches the internet for news articles and analyses them for which stocks will be affected. It forms projections about impacted sectors and stocks and returns a desirability-score telling the user whether to buy or sell. This is communicated to the frontend and displayed easily in a heatmap, where users can see which shares are hot, and more importantly on which information this is based so users can fact check with ease before investing.
